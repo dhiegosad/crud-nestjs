@@ -9,7 +9,16 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
+    "rootDir": "src/",
     "baseUrl": "./",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@config/*": ["./src/config/*"],
+      "@models/*": ["./src/models/*"],
+      "@utils/*": ["./src/shared/utils/*"],
+      "@providers/*": ["./src/shared/providers/"],
+      "@shared/*": ["./src/shared/*"],
+      "@app/*": ["./src/*"]
+    }
   }
 }
