@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common/exceptions/bad-request.exception';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateUserDto, UpdateUserDto } from './dtos';
 import { UserEntity } from './entities/users.entity';
 
 @Injectable()
@@ -13,15 +15,25 @@ export class UsersService {
     return await this.repo.find();
   }
 
-  async create(user: UserEntity): Promise<UserEntity> {
-    return await this.repo.save(user);
+  async create(userDto: CreateUserDto): Promise<UserEntity> {
+    const userExist = await this.repo.findOne({ email: userDto.email });
+    if (userExist)
+      throw new BadRequestException('User already registered with email');
+
+    const newUser = this.repo.create(userDto);
+    const user = await this.repo.save(newUser);
+
+    delete user.password;
+    return user;
   }
 
-  async update(id: string, user: UserEntity): Promise<UserEntity> {
+  async update(id: string, userDto: UpdateUserDto): Promise<UserEntity> {
     const userToUpdate: UserEntity = await this.repo.findOne(id);
     delete userToUpdate.password;
 
-    const userUpdated = Object.assign(userToUpdate, user);
+    if (userToUpdate.id !== id) throw new BadRequestException('User not found');
+
+    const userUpdated = Object.assign(userToUpdate, userDto);
     return await this.repo.save(userUpdated);
   }
 
